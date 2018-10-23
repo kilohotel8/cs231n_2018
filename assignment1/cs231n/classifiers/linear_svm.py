@@ -20,6 +20,7 @@ def svm_loss_naive(W, X, y, reg):
   - gradient with respect to weights W; an array of same shape as W
   """
   dW = np.zeros(W.shape) # initialize the gradient as zero
+
   
   # compute the loss and the gradient
   num_classes = W.shape[1]
@@ -36,8 +37,8 @@ def svm_loss_naive(W, X, y, reg):
         loss += margin
         d_margin_score = 1
         d_margin_correct_score = -1
-        d_score_W = X[i].T
-        d_correct_score_W = X[i].T
+        d_score_W = X[i]
+        d_correct_score_W = X[i]
         d_margin_W = d_margin_score * d_score_W
         d_margin_W_correct = d_margin_correct_score * d_correct_score_W
         dW[:,j] += d_margin_W
@@ -61,7 +62,6 @@ def svm_loss_naive(W, X, y, reg):
   # code above to compute the gradient.                                       #
   #############################################################################
 
-
   return loss, dW
 
 
@@ -79,11 +79,17 @@ def svm_loss_vectorized(W, X, y, reg):
   # Implement a vectorized version of the structured SVM loss, storing the    #
   # result in loss.                                                           #
   #############################################################################
-  pass
+  scores = X.dot(W)
+  correct_scores = scores[np.arange(len(scores)),y].reshape(500,1)
+  temp_loss = scores - correct_scores + 1
+  temp_loss[temp_loss<0] = 0
+  temp_loss[np.arange(len(temp_loss)),y] = 0
+  loss = np.sum(temp_loss,axis = 1)
+  loss = np.mean(loss)
+  
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
-
 
   #############################################################################
   # TODO:                                                                     #
@@ -94,9 +100,21 @@ def svm_loss_vectorized(W, X, y, reg):
   # to reuse some of the intermediate values that you used to compute the     #
   # loss.                                                                     #
   #############################################################################
-  pass
+  d_loss_scores = np.zeros(temp_loss.shape)
+  d_loss_scores[temp_loss > 0] = 1
+  num_train = X.shape[0]
+  incorrect = np.sum(d_loss_scores, axis=1)
+  d_loss_scores[np.arange(X.shape[0]), y] = -incorrect
+  dW = np.dot(X.T,d_loss_scores)
+  dW /= X.shape[0]
+  dW += 2*reg*W
+  
+  
+  
+  
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
+  loss += reg * np.sum(W * W)
 
   return loss, dW
