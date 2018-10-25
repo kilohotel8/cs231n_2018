@@ -80,7 +80,7 @@ def svm_loss_vectorized(W, X, y, reg):
   # result in loss.                                                           #
   #############################################################################
   scores = X.dot(W)
-  correct_scores = scores[np.arange(len(scores)),y].reshape(500,1)
+  correct_scores = scores[np.arange(len(scores)),y].reshape(np.shape(y)[0],1)
   temp_loss = scores - correct_scores + 1
   temp_loss[temp_loss<0] = 0
   temp_loss[np.arange(len(temp_loss)),y] = 0
